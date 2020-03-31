@@ -1,11 +1,10 @@
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong/latlong.dart';
 
-import 'package:ansem/src/blocs/location_bloc.dart';
+import 'package:ansem/src/blocs/provider.dart';
 import 'package:location/location.dart';
 
 class MapaPage extends StatefulWidget {
@@ -17,24 +16,27 @@ class _MapaPageState extends State<MapaPage> {
   final map = new MapController();
 
   String tipoMapa = 'streets';
-  final _locationBloc = LocationBLoC();
+  LocationBLoC locationBloc;
 
   List<Marker> markers = [];
 
-  @override
+  /*@override
   void initState() {
     _locationBloc.getLocation();
     super.initState();
-  }
+  }*/
 
-  @override
-  void dispose() {
-    _locationBloc.dispose();
+  /*@override
+  void dispose() { 
+    locationBloc.dispose();
     super.dispose();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
+    locationBloc = Provider.locationBLoC(context);
+    locationBloc.getLocation();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Ubicación Actual'),
@@ -70,10 +72,10 @@ class _MapaPageState extends State<MapaPage> {
   }
 
   Widget _crearBotonFlotante(BuildContext context) {
-    _locationBloc.getLocation();
+    locationBloc.getLocation();
 
     return StreamBuilder(
-      stream: _locationBloc.locationStream,
+      stream: locationBloc.locationStream,
       builder: (BuildContext context, AsyncSnapshot<LocationData> snapshot) {
         if (snapshot.hasData) {
           final center =
@@ -114,7 +116,7 @@ class _MapaPageState extends State<MapaPage> {
 
   Widget _crearFlutterMap() {
     return StreamBuilder(
-      stream: _locationBloc.locationStream,
+      stream: locationBloc.locationStream,
       builder: (BuildContext context, AsyncSnapshot<LocationData> snapshot) {
         if (snapshot.hasData) {
           final center =
@@ -156,19 +158,4 @@ class _MapaPageState extends State<MapaPage> {
         });
   }
 
-  _crearMarcadores(LatLng center) {
-    return MarkerLayerOptions(markers: <Marker>[
-      Marker(
-          width: 100.0,
-          height: 100.0,
-          point: center,
-          builder: (context) => Container(
-                child: Icon(
-                  Icons.location_on,
-                  size: 70.0,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ))
-    ]);
-  }
 }
